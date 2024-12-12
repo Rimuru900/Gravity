@@ -1,29 +1,30 @@
+-- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
-
+-- GUI Creation
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "Gravity.lol"
 screenGui.Parent = player.PlayerGui
 
-
+-- Toggle Button Creation
 local toggleButton = Instance.new("TextButton")
 toggleButton.Name = "ToggleButton"
-toggleButton.Size = UDim2.new(0, 100, 0, 50)
-toggleButton.Position = UDim2.new(1, -35, 0, 10)
-toggleButton.AnchorPoint = Vector2.new(1, 0)
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Size = UDim2.new(0, 100, 0, 50) -- Button size: 100x50
+toggleButton.Position = UDim2.new(1, -35, 0, 10) -- Top right corner with slight padding
+toggleButton.AnchorPoint = Vector2.new(1, 0) -- Anchor to the top right
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
 toggleButton.Text = "Gravity OFF"
-toggleButton.TextScaled = false 
-toggleButton.BorderSizePixel = 3 
+toggleButton.TextScaled = false -- Fit the text into the button
+toggleButton.BorderSizePixel = 3 -- No border pixels
 toggleButton.Parent = screenGui
 
-
+-- State Variable
 local gravityEnabled = false
 
-
+-- Function to Toggle Gravity
 local function toggleGravity()
 	gravityEnabled = not gravityEnabled
 	if gravityEnabled then
@@ -33,22 +34,22 @@ local function toggleGravity()
 	end
 end
 
-
+-- Button Click Event
 toggleButton.MouseButton1Click:Connect(toggleGravity)
 
-
+-- Anti-Lock Functionality
 local function onPlayerAdded(otherPlayer)
-	
+	-- Check if the other player has a camera lock-on script
 	local function checkLockOn()
 		while true do
 			if gravityEnabled and otherPlayer ~= player then
-				
+				-- Get the other player's character
 				local otherPlayerCharacter = otherPlayer.Character
 				if otherPlayerCharacter then
-					
+					-- Get the other player's camera
 					local otherPlayerCamera = workspace:FindFirstChild(otherPlayer.Name .. "'s Camera")
 					if otherPlayerCamera then
-						
+						-- Point the other player's camera straight up
 						otherPlayerCamera.CFrame = CFrame.new(otherPlayerCamera.Position, Vector3.new(otherPlayerCamera.Position.X, 10000, otherPlayerCamera.Position.Z))
 					end
 				end
@@ -56,17 +57,20 @@ local function onPlayerAdded(otherPlayer)
 			task.wait(0.1) -- Use task.wait instead of RunService.Heartbeat:Wait()
 		end
 	end
+
+	-- Start checking for lock-on in a new thread
 	spawn(checkLockOn)
 end
 
-
+-- Connect the function to the PlayerAdded event
 Players.PlayerAdded:Connect(onPlayerAdded)
 
+-- Ensure the toggle button persists when the player respawns
 player.CharacterAdded:Connect(function()
 	toggleButton.Parent = player.PlayerGui:FindFirstChild("Gravity.lol")
 end)
 
-
+-- Iterate through all existing players and attach the logic
 for _, otherPlayer in Players:GetPlayers() do
 	if otherPlayer ~= player then
 		onPlayerAdded(otherPlayer)
