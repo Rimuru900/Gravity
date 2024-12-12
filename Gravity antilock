@@ -56,8 +56,6 @@ local function onPlayerAdded(otherPlayer)
 			task.wait(0.1) -- Use task.wait instead of RunService.Heartbeat:Wait()
 		end
 	end
-
-	
 	spawn(checkLockOn)
 end
 
