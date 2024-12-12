@@ -1,0 +1,77 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "Gravity.lol"
+screenGui.Parent = player.PlayerGui
+
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(1, -35, 0, 10)
+toggleButton.AnchorPoint = Vector2.new(1, 0)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Text = "Gravity OFF"
+toggleButton.TextScaled = false 
+toggleButton.BorderSizePixel = 3 
+toggleButton.Parent = screenGui
+
+
+local gravityEnabled = false
+
+
+local function toggleGravity()
+	gravityEnabled = not gravityEnabled
+	if gravityEnabled then
+		toggleButton.Text = "Gravity ON"
+	else
+		toggleButton.Text = "Gravity OFF"
+	end
+end
+
+
+toggleButton.MouseButton1Click:Connect(toggleGravity)
+
+
+local function onPlayerAdded(otherPlayer)
+	
+	local function checkLockOn()
+		while true do
+			if gravityEnabled and otherPlayer ~= player then
+				
+				local otherPlayerCharacter = otherPlayer.Character
+				if otherPlayerCharacter then
+					
+					local otherPlayerCamera = workspace:FindFirstChild(otherPlayer.Name .. "'s Camera")
+					if otherPlayerCamera then
+						
+						otherPlayerCamera.CFrame = CFrame.new(otherPlayerCamera.Position, Vector3.new(otherPlayerCamera.Position.X, 10000, otherPlayerCamera.Position.Z))
+					end
+				end
+			end
+			task.wait(0.1) -- Use task.wait instead of RunService.Heartbeat:Wait()
+		end
+	end
+
+	
+	spawn(checkLockOn)
+end
+
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+
+player.CharacterAdded:Connect(function()
+	toggleButton.Parent = player.PlayerGui:FindFirstChild("Gravity.lol")
+end)
+
+
+for _, otherPlayer in Players:GetPlayers() do
+	if otherPlayer ~= player then
+		onPlayerAdded(otherPlayer)
+	end
+end
+
